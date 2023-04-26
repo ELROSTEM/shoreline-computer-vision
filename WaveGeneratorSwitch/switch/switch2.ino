@@ -1,9 +1,6 @@
 #include <ezButton.h>
 #include <AccelStepper.h>
 
-ezButton button1(9);
-ezButton button2(11);
-ezButton button3(13);
 ezButton button4(3);
 
 #define DEG_PER_STEP 1.8
@@ -11,20 +8,17 @@ ezButton button4(3);
 AccelStepper stepper(AccelStepper::FULL4WIRE, 7, 6, 5, 4);
 const int steps_per_rev = 200;
 
-int oldb1,newb1,oldb2,newb2,oldb3,newb3,oldb4,newb4;
+int oldb4,newb4;
 int mode;
 bool hold;
-bool b1toggled,b2toggled,b3toggled,b4toggled;
+bool b4toggled;
 
 void setup() {
   Serial.begin(9600);
-  button1.setDebounceTime(50);
-  button2.setDebounceTime(50);
-  button3.setDebounceTime(50);
   button4.setDebounceTime(50);
   pinMode(8,OUTPUT);
+  pinMode(9,OUTPUT);
   pinMode(10,OUTPUT);
-  pinMode(12,OUTPUT);
   pinMode(2,OUTPUT);
   stepper.setCurrentPosition(0);
 }
@@ -51,45 +45,40 @@ void varpulse(int speed1, int speed2, int distance, int iterations){
 }
 
 void modes(){
+  if (mode == 0){
+    varpulse(5000,5000,150,1);
+  }
   if (mode == 1){
-    varpulse(1000,1000,150,1);
+    varpulse(5000,1000,150,1);
   }
   if (mode == 2){
-    varpulse(100,1000,150,1);
-  }
-  if (mode == 3){
-    varpulse(1000,1000,150,5);
+    varpulse(2000,2000,150,5);
   }
 }
+
 void loop() {
-  button1.loop();
-  button2.loop();
-  button3.loop();
   button4.loop();
-  oldb1 = newb1, oldb2 = newb2, oldb3 = newb3, oldb4 = newb4;
-  newb1 = button1.isPressed(), newb2 = button2.isPressed(), newb3 = button3.isPressed(), newb4 = button4.isPressed();
-  b1toggled = (oldb1 == true && newb1 == false); 
-  b2toggled = (oldb2 == true && newb2 == false);
-  b3toggled = (oldb3 == true && newb3 == false);
+  oldb4 = newb4;
+  newb4 = button4.isPressed();
   b4toggled = (oldb4 == true && newb4 == false);
   digitalWrite(2,LOW);
-  if (b1toggled){
-    mode = 1;
+  int potentout = floor(analogRead(A1)*3.9/1023);
+  int mode = potentout;
+  Serial.println(mode);
+  if (mode == 0){
     digitalWrite(8,HIGH);
+    digitalWrite(9,LOW);
     digitalWrite(10,LOW);
-    digitalWrite(12,LOW);
   }
-  if (b2toggled){
-    mode = 2;
+  if (mode == 1){
     digitalWrite(8,LOW);
+    digitalWrite(9,HIGH);
+    digitalWrite(10,LOW);
+  }
+  if (mode == 2){
+    digitalWrite(8,LOW);
+    digitalWrite(9,LOW);
     digitalWrite(10,HIGH);
-    digitalWrite(12,LOW);
-  }
-  if (b3toggled){
-    mode = 3;
-    digitalWrite(8,LOW);
-    digitalWrite(10,LOW);
-    digitalWrite(12,HIGH);
   }
   if (b4toggled){
     digitalWrite(2,HIGH);
