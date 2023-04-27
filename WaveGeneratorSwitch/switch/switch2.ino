@@ -52,7 +52,7 @@ void varpulse(int speed1, int speed2, int distance, int iterations){
 
 void modes(int m, int svar, int dvar){
   int speed = 1000+2000*svar;
-  int dist = 150;
+  int dist = 50+75*dvar;
   if (m == 0){
     varpulse(speed,speed,dist,1);
   }
