@@ -51,8 +51,8 @@ void varpulse(int speed1, int speed2, int distance, int iterations){
 }
 
 void modes(int m, int svar, int dvar){
-  speed = 1000+2000*svar
-  dist = 150
+  int speed = 1000+2000*svar;
+  int dist = 150;
   if (m == 0){
     varpulse(speed,speed,dist,1);
   }
@@ -96,12 +96,12 @@ void loop() {
     digitalWrite(12,HIGH);
   }
   if (b1toggled){
-    s = (s+1)%3
-    analogWrite(9,s*127)
+    s = (s+1)%3;
+    analogWrite(9,56*s*s);
   }
   if (b2toggled){
-    d = (d+1)%3
-    analogWrite(11,d*127)
+    d = (d+1)%3;
+    analogWrite(11,56*s*s);
   }
   if (b3toggled){
     digitalWrite(2,HIGH);
