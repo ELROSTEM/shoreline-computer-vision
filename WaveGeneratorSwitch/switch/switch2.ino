@@ -11,7 +11,7 @@ AccelStepper stepper(AccelStepper::FULL4WIRE, 7, 6, 5, 4);
 const int steps_per_rev = 200;
 
 bool oldb1,newb1,oldb2,newb2,oldb3,newb3;
-int mode;
+int mode,s,d;
 bool hold;
 bool b1toggled,b2toggled,b3toggled;
 
@@ -50,15 +50,17 @@ void varpulse(int speed1, int speed2, int distance, int iterations){
   }
 }
 
-void modes(int m){
+void modes(int m, int svar, int dvar){
+  speed = 1000+2000*svar
+  dist = 150
   if (m == 0){
-    varpulse(5000,5000,150,1);
+    varpulse(speed,speed,dist,1);
   }
   if (m == 1){
-    varpulse(5000,1000,150,1);
+    varpulse(speed,speed/10,dist,1);
   }
   if (m == 2){
-    varpulse(2000,2000,150,5);
+    varpulse(speed,speed,dist,5);
   }
 }
 
@@ -93,14 +95,22 @@ void loop() {
     digitalWrite(10,LOW);
     digitalWrite(12,HIGH);
   }
+  if (b1toggled){
+    s = (s+1)%3
+    analogWrite(9,s*127)
+  }
+  if (b2toggled){
+    d = (d+1)%3
+    analogWrite(11,d*127)
+  }
   if (b3toggled){
     digitalWrite(2,HIGH);
-    modes(mode);
+    modes(mode,s,d);
     while (true){
       if (button3.getStateRaw() == 1){
         break;
       }
-      modes(mode);
+      modes(mode,s,d);
     }
     digitalWrite(2,LOW);
   }
