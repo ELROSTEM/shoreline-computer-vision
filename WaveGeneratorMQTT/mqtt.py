@@ -22,7 +22,7 @@ def wavetype_coversion(wavetype):
         elif wavetype == 3:
             return "wavetype3"
 
-client = mqtt.Client()
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
 wavetype = "None"
 speed = 0
