@@ -31,12 +31,23 @@ int distance = 0;
 
 long moveToPosition = STEP_PER_REVOLUTION;
 
-void setup() {
 
+void setup() {
+  Serial.begin(9600);
+  pinMode(12, OUTPUT);
+  pinMode(13, OUTPUT);
+  digitalWrite(12, HIGH);  
   // attempt to connect to WiFi network:
+  Serial.println("Attempting to connect");
+  Serial.println(ssid);
   while (WiFi.begin(ssid, pass) != WL_CONNECTED) {
     // failed, retry
+    digitalWrite(13, LOW);
+
+    Serial.println("failed");    
     delay(5000);
+
+    digitalWrite(13, HIGH);
   }
 
   if (!mqttClient.connect(broker, port)) {
@@ -46,6 +57,7 @@ void setup() {
   // subscribe to a topic
   mqttClient.subscribe(topic);
 
+  digitalWrite(13, HIGH);
   // Wave Tank
   stepper.setCurrentPosition(0);
   wavetype = 1;
@@ -73,11 +85,15 @@ void loop() {
 
     token = strtok(NULL, " ");
     distance = atoi(token);
-
+    
+    Serial.print("Type:");
+    Serial.println(wavetype);  
     /*MonoPulse Mode*/
     // value of 255: pulse mode
+
     if(wavetype == 1){
-      // const int steps_per_rev = 200;
+
+      const int steps_per_rev = 200;
 
       // stepper.setMaxSpeed(100);
       // stepper.setAcceleration(20);
@@ -86,7 +102,6 @@ void loop() {
       // stepper.moveTo(-stepper.currentPosition());
  
       // stepper.run();
-      
 
       pinMode(13, OUTPUT);
       digitalWrite(13, HIGH);  // turn the LED on (HIGH is the voltage level)
@@ -104,7 +119,7 @@ void loop() {
       stepper.stop(); // Stop as fast as possible: sets new target
       stepper.runToPosition(); 
       // Now stopped after quickstop
-    
+      Serial.println("Reverse");
       // Now go backwards
       stepper.moveTo(0);
       while (stepper.currentPosition() != 0) // Full speed basck to 0
