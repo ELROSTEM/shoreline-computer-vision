@@ -1,4 +1,3 @@
-
 #include<stdio.h>
 #include <string.h>
 
@@ -17,7 +16,11 @@ int distance = 0;
 const int powerLed = 13;
 const int statusLed = 11;
 
-String dstring = "";
+bool run = true;
+
+String command = "";
+String param = "";
+String value = "";
 
 long moveToPosition = STEP_PER_REVOLUTION;
 
@@ -36,71 +39,128 @@ void setup() {
 }
 
 void loop() {
-  
+  //default
+
   if (Serial.available()) {
-    dstring = Serial.readStringUntil('\n');
-    dstring.trim();
-    distance = max(0,min(200,dstring.toInt()));
 
-    Serial.print("Distance:");
-    Serial.println(distance); 
+    command = Serial.readStringUntil('\n');
+    command.trim();
 
-    if(wavetype == 1){
-
-      const int steps_per_rev = 200;
-
-      // stepper.setMaxSpeed(100);
-      // stepper.setAcceleration(20);
-      // stepper.moveTo(500);
-      // if (stepper.distanceToGo() == 0)
-      // stepper.moveTo(-stepper.currentPosition());
-
-      // stepper.run();   
+    if (command == "run") {
+      run = true;      
     }
-    if(wavetype == 2){
+    else if (command == "set") {
 
-      digitalWrite(statusLed, HIGH);
-      stepper.setMaxSpeed(speed);
-      stepper.setAcceleration(speed);
+      while (param != "done") {
+        Serial.println("Set parameters: wavetype, distance, speed");
 
-      stepper.moveTo(distance);
-      while (stepper.currentPosition() != distance) // Full speed up to 300
-        stepper.run();
-      stepper.stop(); // Stop as fast as possible: sets new target
-      stepper.runToPosition(); 
-      // Now stopped after quickstop
-      // Now go backwards
-      stepper.moveTo(0);
-      while (stepper.currentPosition() != 0) // Full speed basck to 0
-        stepper.run();
-      stepper.stop(); // Stop as fast as possible: sets new target
-      stepper.runToPosition(); 
-      // Now stopped after quickstop
+        param = Serial.readStringUntil('\n');
+        param.trim();
 
-      digitalWrite(statusLed, LOW);
-      delay(100);
-    }
-    if(wavetype == 3){
-      stepper.setMaxSpeed(speed);
-      stepper.setAcceleration(speed);
+        Serial.println("Set " + String(param) + ": ");
 
-      stepper.moveTo(distance);
-      while (stepper.currentPosition() != distance) // Full speed up to 300
-        stepper.run();
-      stepper.stop(); // Stop as fast as possible: sets new target
-      stepper.runToPosition(); 
-      // Now stopped after quickstop
-    
-      // Now go backwards
-      stepper.moveTo(0);
-      while (stepper.currentPosition() != 0) // Full speed basck to 0
-        stepper.run();
-      stepper.stop(); // Stop as fast as possible: sets new target
-      stepper.runToPosition(); 
-      // Now stopped after quickstop
+        value = Serial.readStringUntil('\n');
+        value.trim();
+
+        if (param == "wavetype"){
+          wavetype = max(1,min(3,value.toInt()));
+        }
+        if (param == "speed"){
+          speed = max(0,min(5000,value.toInt()));
+        }
+        if (param == "distance"){
+          distance = max(0,min(200,value.toInt()));
+        }
+      }
+      //print contents of setup
+      Serial.println("  Wavetype: " + String(wavetype));
+      Serial.println("  Distance: " + String(distance));
+      Serial.println("  Speed: " + String(speed));
     }
   }
+  if (run) {
 
+    Serial.println("Running!");
+    Serial.println("  Wavetype: " + String(wavetype));
+    Serial.println("  Distance: " + String(distance));
+    Serial.println("  Speed: " + String(speed));
+
+    switch (wavetype){
+
+      case 1:
+
+        const int steps_per_rev = 200;
+
+        // stepper.setMaxSpeed(100);
+        // stepper.setAcceleration(20);
+        // stepper.moveTo(500);
+        // if (stepper.distanceToGo() == 0)
+        // stepper.moveTo(-stepper.currentPosition());
+
+        // stepper.run();   
+        break;
+      
+      case 2:
+
+        digitalWrite(statusLed, HIGH);
+        stepper.setMaxSpeed(speed);
+        stepper.setAcceleration(speed);
+
+        stepper.moveTo(distance);
+        while (stepper.currentPosition() != distance) // Full speed up to 300
+          stepper.run();
+        stepper.stop(); // Stop as fast as possible: sets new target
+        stepper.runToPosition(); 
+        // Now stopped after quickstop
+        // Now go backwards
+        stepper.moveTo(0);
+        while (stepper.currentPosition() != 0) // Full speed basck to 0
+          stepper.run();
+        stepper.stop(); // Stop as fast as possible: sets new target
+        stepper.runToPosition(); 
+        // Now stopped after quickstop
+
+        digitalWrite(statusLed, LOW);
+        delay(100);
+        break;
+
+      case 3:
+
+        stepper.setMaxSpeed(speed);
+        stepper.setAcceleration(speed);
+
+        stepper.moveTo(distance);
+        while (stepper.currentPosition() != distance) // Full speed up to 300
+          stepper.run();
+        stepper.stop(); // Stop as fast as possible: sets new target
+        stepper.runToPosition(); 
+        // Now stopped after quickstop
+      
+        // Now go backwards
+        stepper.moveTo(0);
+        while (stepper.currentPosition() != 0) // Full speed basck to 0
+          stepper.run();
+        stepper.stop(); // Stop as fast as possible: sets new target
+        stepper.runToPosition(); 
+        // Now stopped after quickstop
+        break;
+
+      default:
+
+        Serial.println("Invalid Wavetype.");
+        break;
+    }
+
+    run = !run;
+
+  }
+
+
+
+
+
+
+}
 
 
 
